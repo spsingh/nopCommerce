@@ -1116,6 +1116,33 @@ span.grid-report-item.red {
     margin: 0 5px 8px 0;
 }
 
+/*nested settings*/
+.nested-setting.opened .nested-setting-line-wrapper {
+    position: relative;
+}
+.nested-setting .nested-setting-line {
+    border-left: 1px dashed #8a8a8a;
+    position: absolute;
+    margin-left: 5px;
+    display: none;
+}
+.nested-setting.opened .nested-setting-line {
+    display: block;
+}
+.nested-setting.opened > .form-group > div + div {
+    padding-left: 35px;
+}
+.nested-setting.opened > .form-group > div + div:before {
+    border-bottom: 1px dashed #8a8a8a;
+    content: "";
+    position: absolute;
+    width: 13px;
+    height: 100%;
+    display: block;
+    margin-top: -12px;
+    margin-left: -13px;
+}
+
 /*advanced settings*/
 .basic-settings-mode .advanced-setting {
     display: none !important;
