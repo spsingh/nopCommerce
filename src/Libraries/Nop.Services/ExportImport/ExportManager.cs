@@ -309,7 +309,7 @@ namespace Nop.Services.ExportImport
             }
         }
 
-        private static PropertyManager<ExportProductAttribute> GetProductAttributeManager()
+        private PropertyManager<ExportProductAttribute> GetProductAttributeManager()
         {
             var attributeProperties = new[]
             {
@@ -344,7 +344,7 @@ namespace Nop.Services.ExportImport
             return new PropertyManager<ExportProductAttribute>(attributeProperties);
         }
 
-        private static PropertyManager<ExportSpecificationAttribute> GetSpecificationAttributeManager(ISpecificationAttributeService specificationAttributeService)
+        private PropertyManager<ExportSpecificationAttribute> GetSpecificationAttributeManager()
         {
             var attributeProperties = new[]
             {
@@ -354,7 +354,7 @@ namespace Nop.Services.ExportImport
                 },
                 new PropertyByName<ExportSpecificationAttribute>("SpecificationAttribute", p => p.SpecificationAttributeId)
                 {
-                    DropDownElements = specificationAttributeService.GetSpecificationAttributes().Select(sa => sa as BaseEntity).ToSelectList(p => (p as SpecificationAttribute)?.Name ?? string.Empty)
+                    DropDownElements = _specificationAttributeService.GetSpecificationAttributes().Select(sa => sa as BaseEntity).ToSelectList(p => (p as SpecificationAttribute)?.Name ?? string.Empty)
                 },
                 new PropertyByName<ExportSpecificationAttribute>("CustomValue", p => p.CustomValue),
                 new PropertyByName<ExportSpecificationAttribute>("SpecificationAttributeOptionId", p => p.SpecificationAttributeOptionId),
@@ -385,7 +385,7 @@ namespace Nop.Services.ExportImport
         private byte[] ExportProductsToXlsxWithAttributes(PropertyByName<Product>[] properties, IEnumerable<Product> itemsToExport)
         {
             var productAttributeManager = GetProductAttributeManager();
-            var specificationAttributeManager = GetSpecificationAttributeManager(_specificationAttributeService);
+            var specificationAttributeManager = GetSpecificationAttributeManager();
 
             using (var stream = new MemoryStream())
             {

@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents the type of the exported attribute
     /// </summary>
-    public enum TypeOfExportedAttribute
+    public enum ExportedAttributeType
     {
         /// <summary>
         /// Not specified
