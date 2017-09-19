@@ -348,17 +348,16 @@ namespace Nop.Web.Areas.Admin.Controllers
             if (!_permissionService.Authorize(StandardPermissionProvider.ManageLanguages))
                 return AccessDeniedKendoGridJson();
 
-            var query = _localizationService
-                .GetAllResourceValues(languageId)
-                .OrderBy(x => x.Key)
-                .AsQueryable();
+            var publicResource = _localizationService.GetAllResourceValues(languageId, true);
+            var adminResource = _localizationService.GetAllResourceValues(languageId, false);
+            var allResource = publicResource.Concat(adminResource).OrderBy(x => x.Key).AsQueryable();
 
             if (!string.IsNullOrEmpty(model.SearchResourceName))
-                query = query.Where(l => l.Key.ToLowerInvariant().Contains(model.SearchResourceName.ToLowerInvariant()));
+                allResource = allResource.Where(l => l.Key.ToLowerInvariant().Contains(model.SearchResourceName.ToLowerInvariant()));
             if (!string.IsNullOrEmpty(model.SearchResourceValue))
-                query = query.Where(l => l.Value.Value.ToLowerInvariant().Contains(model.SearchResourceValue.ToLowerInvariant()));
+                allResource = allResource.Where(l => l.Value.Value.ToLowerInvariant().Contains(model.SearchResourceValue.ToLowerInvariant()));
 
-            var resources = query
+            var resources = allResource
                 .Select(x => new LanguageResourceModel
                 {
                     LanguageId = languageId,

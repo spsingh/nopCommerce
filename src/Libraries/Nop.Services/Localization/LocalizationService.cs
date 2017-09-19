@@ -29,7 +29,14 @@ namespace Nop.Services.Localization
         /// <remarks>
         /// {0} : language ID
         /// </remarks>
-        private const string LOCALSTRINGRESOURCES_ALL_KEY = "Nop.lsr.all-{0}";
+        private const string LOCALSTRINGRESOURCES_ALL_PUBLIC_KEY = "Nop.lsr.all.public-{0}";
+        /// <summary>
+        /// Key for caching
+        /// </summary>
+        /// <remarks>
+        /// {0} : language ID
+        /// </remarks>
+        private const string LOCALSTRINGRESOURCES_ALL_ADMIN_KEY = "Nop.lsr.all.admin-{0}";
         /// <summary>
         /// Key for caching
         /// </summary>
@@ -42,6 +49,10 @@ namespace Nop.Services.Localization
         /// Key pattern to clear cache
         /// </summary>
         private const string LOCALSTRINGRESOURCES_PATTERN_KEY = "Nop.lsr.";
+        /// <summary>
+        /// Key pattern to split resource by group
+        /// </summary>
+        private const string ADMIN_LOCALSTRINGRESOURCES_PATTERN = "Admin.";
 
         #endregion
 
@@ -68,7 +79,6 @@ namespace Nop.Services.Localization
         /// <param name="logger">Logger</param>
         /// <param name="workContext">Work context</param>
         /// <param name="lsrRepository">Locale string resource repository</param>
-        /// <param name="languageService">Language service</param>
         /// <param name="dataProvider">Data provider</param>
         /// <param name="dbContext">Database Context</param>
         /// <param name="commonSettings">Common settings</param>
@@ -254,15 +264,16 @@ namespace Nop.Services.Localization
             //event notification
             _eventPublisher.EntityUpdated(localeStringResource);
         }
-
+        
         /// <summary>
         /// Gets all locale string resources by language identifier
         /// </summary>
         /// <param name="languageId">Language identifier</param>
+        /// <param name="isPublic">Specifies whether to load data for the public store</param>
         /// <returns>Locale string resources</returns>
-        public virtual Dictionary<string, KeyValuePair<int,string>> GetAllResourceValues(int languageId)
+        public virtual Dictionary<string, KeyValuePair<int,string>> GetAllResourceValues(int languageId, bool isPublic)
         {
-            string key = string.Format(LOCALSTRINGRESOURCES_ALL_KEY, languageId);
+            var key = string.Format(isPublic ? LOCALSTRINGRESOURCES_ALL_PUBLIC_KEY : LOCALSTRINGRESOURCES_ALL_ADMIN_KEY, languageId);
             return _cacheManager.Get(key, () =>
             {
                 //we use no tracking here for performance optimization
@@ -271,6 +282,7 @@ namespace Nop.Services.Localization
                             orderby l.ResourceName
                             where l.LanguageId == languageId
                             select l;
+                query = isPublic ? query.Where(r =>  !r.ResourceName.StartsWith(ADMIN_LOCALSTRINGRESOURCES_PATTERN)) : query.Where(r => r.ResourceName.StartsWith(ADMIN_LOCALSTRINGRESOURCES_PATTERN));
                 var locales = query.ToList();
                 //format: <name, <id, value>>
                 var dictionary = new Dictionary<string, KeyValuePair<int, string>>();
@@ -316,7 +328,7 @@ namespace Nop.Services.Localization
             if (_localizationSettings.LoadAllLocaleRecordsOnStartup)
             {
                 //load all records (we know they are cached)
-                var resources = GetAllResourceValues(languageId);
+                var resources = GetAllResourceValues(languageId, !resourceKey.StartsWith(ADMIN_LOCALSTRINGRESOURCES_PATTERN, StringComparison.InvariantCultureIgnoreCase));
                 if (resources.ContainsKey(resourceKey))
                 {
                     result = resources[resourceKey].Value;
