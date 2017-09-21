@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Domain.Orders;
@@ -46,7 +44,7 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.Components
             this._genericAttributeService = genericAttributeService;
         }
 
-        public IViewComponentResult Invoke()
+        public IViewComponentResult Invoke(string widgetZone)
         {
             string globalScript = "";
             var routeData = Url.ActionContext.RouteData;
